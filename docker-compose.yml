@@ -1,0 +1,30 @@
+name: estudiante11
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: est11_db
+    env_file: .env
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    image: est11_api:1.0
+    container_name: est11_api
+    env_file: .env
+    ports:
+      - "${API_PORT}:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  dbdata:
